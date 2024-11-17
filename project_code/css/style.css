@@ -19,24 +19,15 @@ body {
     display: flex; /* 使用 flex 布局 */
     justify-content: space-between; /* 内容两端对齐 */
     align-items: center; /* 垂直居中对齐 */
-    padding: 5px; /* 内边距设置为 5px */
+    padding: 5px 5px; /* 缩小内边距：上下 2px，左右 5px */
     margin-left: 5px; 
     margin-right: 5px; 
-    background-color: #e6ebf2; /* 背景颜色设置为蓝色 */
-    border-bottom: 1px solid #ddd; /* 下边框为浅灰色实线 */
     flex-wrap: wrap; /* 自动换行以适应较小屏幕 */
-    border-radius: 8px; /* 圆角设置为 8px */
+    line-height: 0.5; /* 设置较小的行高以压缩高度 */
+    min-height: 25px; /* 设置最小高度以确保内容不会过于压缩 */
 }
 
-.logo {
-    display: flex; /* 使用 flex 布局 */
-    align-items: center; /* 垂直居中对齐 */
-}
 
-.logo img {
-    height: 40px; /* 图片高度设置为 40px */
-    margin-right: 15px; /* 图片右侧设置 15px 的间距 */
-}
 
 .tabs {
     display: flex; /* 使用 flex 布局 */
@@ -65,34 +56,72 @@ main {
     gap: 20px; /* 内容块之间的间距为 20px */
 }
 
-#left-panel, #right-panel {
-    padding: 20px; /* 内边距设置为 20px */
-    background-color: #e4e9f3; /* 背景颜色为白色 */
-    border-radius: 8px; /* 圆角设置为 8px */
-    margin-bottom: 20px; /* 下方外边距设置为 20px */
+#left-panel {
+    flex: 3; /* 左侧面板占主内容的 3/4 */
+    margin-right: 0px; /* 右侧间距设置为 20px */
+    min-width: 300px; /* 最小宽度设置为 300px */
+    max-width: 70%; /* 最大宽度为 70% */
+    margin-left: 60px; 
+}
+#left-container{
+    position: relative; /* 相对定位，为内部的绝对定位元素提供参考 */
+    display: flex; /* 使用 Flexbox 实现水平排列 */
+    flex-direction: column; /* 默认垂直排列 */
+    padding: 0;
+    background-color: rgb(233, 236, 243); /* 背景颜色为白色 */
+    border-radius: 10px; /* 圆角设置为 8px */
+    margin-bottom: 30px; /* 下方外边距设置为 20px */
     margin-left: 5px; /* 下方外边距设置为 20px */
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 设置阴影效果，使内容块更具立体感 */
 }
 
-#left-panel {
-    flex: 3; /* 左侧面板占主内容的 3/4 */
-    margin-right: 20px; /* 右侧间距设置为 20px */
-    min-width: 300px; /* 最小宽度设置为 300px */
-    max-width: 70%; /* 最大宽度为 70% */
+#europe_map{
+    width: 80%; /* 占据父容器的宽度 */
+    margin-left: auto; /* 自动将地图推到容器右边 */
+    position: relative; /* 确保子元素以此为参考定位 */
+    z-index: 1; /* 保持较低的层级 */
+}
+
+#text {
+    width: 30%; /* 占宽度的 30% */
+    height: auto;
+    display: flex;
+    flex-direction: column; /* 纵向排列内容 */
+    gap: 10px; /* 子元素间距 */
+    background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
+    border: 1px solid #ddd; /* 添加边框 */
+    border-radius: 5px; /* 圆角效果 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+    padding: 10px; /* 内边距 */
+    z-index: 2; /* 确保覆盖在背景之上 */
 }
 
 #right-panel {
+    padding: 20px; /* 内边距设置为 20px */
+    border-radius: 10px; /* 圆角设置为 8px */
+    margin-top: 10px; /* 下方外边距设置为 20px */
+    margin-bottom: 10px; /* 下方外边距设置为 20px */
     flex: 1; /* 右侧面板占主内容的 1/4 */
     min-width: 250px; /* 最小宽度设置为 250px */
     max-width: 30%; /* 最大宽度为 30% */
-    margin-right: 5px; 
+    margin-right: 60px; 
+    z-index: 2; /* 设置较高的层级 */
+    background-color: #fff; /* 确保背景色不透明以覆盖下层 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 可选：为右侧面板添加阴影 */
+    border-radius: 10px; /* 添加圆角 */
+
 }
 
 /* 时间轴图表占位符样式 */
 #timeline-chart {
-    height: 180px; /* 设置高度为 200px */
-    margin-top: 10px; /* 上方外边距设置为 10px */
-    background-color: #ffffff; /* 背景颜色为浅灰色，用于占位 */
+    height: 170px; /* 设置高度 */
+    width: calc(100% - 120px); /* 宽度减去左右各 20px 的间距 */
+    margin: 20px auto 20px;
+    padding: 10px; /* 内边距（可根据需要调整） */
+    background-color: #ffffff; /* 背景颜色 */
+    box-shadow: 0 4px 8px rgba(3, 1, 1, 0.2); /* 添加阴影效果 */
+    border-radius: 10px; /* 可选：圆角效果 */
+    
 }
 
 /* 响应式布局的媒体查询 */
