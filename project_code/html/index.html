@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/map.css">
     <title>Electricity Access Visualization</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="../js/europe_map.js"></script>
+    <script src="../js/dataLoader.js"></script>
     <script src="../js/right_panel_data_script.js"></script>
     <script src="../js/timeline_chart.js"></script>
     <script src="../js/main.js"></script>
@@ -21,7 +23,7 @@
                     <div class="header-content">
                         <div class="logo">
                             <!-- <img src="../images/logo.png" alt="Affordable and Clean Energy"> -->
-                            <h1>Affordable and Clean Energy</h1>
+                            <h1>Affordable and Clean Enerooorgy</h1>
                         </div>
                         <nav class="tabs">
                             <button class="tab" data-target="electricity-access">Electricity Access</button>
@@ -34,7 +36,10 @@
                 <div id="left-container">
                     <!-- <h2>Access to electricity has improved around the world in the last 20 years</h2>
                     <h3><span id="electricity-2000">74%</span> had access to electricity worldwide in 2000</h3> -->
-                    <div id="text"></div>
+                    <div id="text">
+                        <div class="radio-container"></div>
+                        <div class="button-container"></div>
+                    </div>
                     <div id="europe_map"></div>
                     <div id="timeline-chart"></div>
                 </div>
