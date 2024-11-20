@@ -4,34 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/map.css">
     <title>Electricity Access Visualization</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="../js/europe_map.js"></script>
+    <script src="../js/dataLoader.js"></script>
     <script src="../js/right_panel_data_script.js"></script>
     <script src="../js/timeline_chart.js"></script>
     <script src="../js/main.js"></script>
 </head>
 <body>
     <div id="container">
-        <header>
-            <div class="header-content">
-                <div class="logo">
-                    <!-- <img src="../images/logo.png" alt="Affordable and Clean Energy"> -->
-                    <h1>Affordable and Clean Energy</h1>
-                </div>
-                <nav class="tabs">
-                    <button class="tab" data-target="electricity-access">Electricity Access</button>
-                    <button class="tab" data-target="T1">T1</button>
-                    <button class="tab" data-target="T2">T2</button>
-                </nav>
-            </div>
-        </header>
+        
         <main>
             <section id="left-panel">
-                <h2>Access to electricity has improved around the world in the last 20 years</h2>
-                <h3><span id="electricity-2000">74%</span> had access to electricity worldwide in 2000</h3>
-                <div id="europe_map"></div>
-                <div id="timeline-chart"></div>
+
+                <header>
+                    <div class="header-content">
+                        <div class="logo">
+                            <!-- <img src="../images/logo.png" alt="Affordable and Clean Energy"> -->
+                            <h1>Affordable and Clean Enerooorgy</h1>
+                        </div>
+                        <nav class="tabs">
+                            <button class="tab" data-target="electricity-access">Electricity Access</button>
+                            <button class="tab" data-target="T1">T1</button>
+                            <button class="tab" data-target="T2">T2</button>
+                        </nav>
+                    </div>
+                </header>
+
+                <div id="left-container">
+                    <!-- <h2>Access to electricity has improved around the world in the last 20 years</h2>
+                    <h3><span id="electricity-2000">74%</span> had access to electricity worldwide in 2000</h3> -->
+                    <div id="text">
+                        <div class="radio-container"></div>
+                        <div class="button-container"></div>
+                    </div>
+                    <div id="europe_map"></div>
+                    <div id="timeline-chart"></div>
+                </div>
+                
             </section>
             <section id="right-panel">
                 <h3>Access to electricity in urban vs rural areas</h3>
