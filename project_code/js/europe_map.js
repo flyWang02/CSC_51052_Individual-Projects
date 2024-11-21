@@ -14,9 +14,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // 定义剪辑路径和渐变效果
     const defs = svg.append("defs");
-    const c_x = 335; // 圆心 X 坐标
-    const c_y = 190; // 圆心 Y 坐标
-    const c_r = 170; // 圆半径
+    const c_x = 250; // 圆心 X 坐标
+    const c_y = 185; // 圆心 Y 坐标
+    const c_r = 165; // 圆半径
 
     // 定义一个剪辑路径，限制地图的显示区域
     defs.append("clipPath")
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         .attr("cy", c_y)
         .attr("r", c_r)
         .attr("fill", "#f7f8fb"); // 背景圆的颜色
-
+ 
     // 绘制一个渐变环，覆盖在地图外层
     svg.append("circle")
         .attr("cx", c_x)
@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         .attr("d", path) // 根据地理数据生成路径
         .attr("fill", "#d3d3d3") // 填充颜色
         .attr("stroke", "#e9e9e9") // 边界颜色
+        .attr("stroke-width", 0.5) // 边界线宽度（1px）
         .attr("fill-opacity", 0.3); // 填充透明度
 
     // 筛选欧洲国家的地理数据
@@ -108,12 +109,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     function updateMap() {
         const selectedYear = dataLoader.getSelectedYear(); // 动态获取选中年份
         let selectedField = dataLoader.getSelectedField(); // 动态获取选中字段
-    
+
         // 如果未选择任何字段，设置默认字段
         if (!selectedField) {
             selectedField = "Gross_electricity_production";
         }
-    
+
         // 筛选数据并获取映射
         const { countryMap, values } = dataLoader.filterDataByYearAndField(
             csvData,
@@ -122,55 +123,82 @@ document.addEventListener("DOMContentLoaded", async function () {
             europeanCountryNames
         );
 
-        // 创建对数比例尺和颜色比例尺
-        const logScale = d3.scaleLog()
-            .domain([d3.min(values), d3.max(values)]) // 定义数据范围
-            .range([0, 1]); // 定义输出范围
-    
-        const colorScale = d3.scaleSequential(d3.interpolateViridis);
-    
-        // 绘制或更新国家的路径
+        // 自定义颜色比例尺：低值浅蓝 -> 中值深蓝 -> 高值红色
+        const colorScale = d3.scaleLinear()
+            .domain([d3.min(values), (d3.min(values) + d3.max(values)) / 2, d3.max(values)])
+            .range(["#89CFF0", "#00008B", "#4B0082"]);
+
+        // 更新地图
         clippedGroup.selectAll(".europe-path")
-            .data(europeanCountries) // 绑定欧洲国家数据
-            .join("path") // 绘制路径
-            .attr("class", "europe-path")
-            .attr("d", path) // 根据地理数据生成路径
-            .attr("fill", d => {
-                const value = countryMap.get(d.properties.ADMIN);
-                return value > 0 ? colorScale(logScale(value)) : "#ccc"; // 根据值设置颜色
-            })
-            .attr("stroke", "#fff") // 边界颜色
-            // 鼠标悬停时高亮显示
-            .on("mouseover", function (event, d) {
-                const value = countryMap.get(d.properties.ADMIN);
-                if (value > 0) {
-                    const currentColor = d3.color(colorScale(logScale(value)));
-                    d3.select(this).attr("fill", currentColor.brighter(1.5));
-                }
-            })
-            // 鼠标移出时恢复原颜色
-            .on("mouseout", function (event, d) {
-                const value = countryMap.get(d.properties.ADMIN);
-                d3.select(this).attr("fill", value > 0 ? colorScale(logScale(value)) : "#ccc");
-            })
-            // 显示国家名称和数值
-            .append("title")
-            .text(d => {
-                const value = countryMap.get(d.properties.ADMIN);
-                return `${d.properties.ADMIN || d.properties.name}: ${selectedField.replace("_", " ")} = ${value ? value.toFixed(2) : "No Data"}`;
-            });
+            .data(europeanCountries)
+            .join(
+                enter => enter.append("path")
+                    .attr("class", "europe-path")
+                    .attr("d", path)
+                    .attr("fill", d => {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        return value > 0 ? colorScale(value) : "#ccc";
+                    })
+                    .attr("stroke", "#fff")
+                    .attr("stroke-width", 0.5) // 边界线宽度（1px）
+                    .on("mouseover", function (event, d) {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        if (value > 0) {
+                            const currentColor = d3.color(colorScale(value));
+                            d3.select(this).attr("fill", currentColor.brighter(1.5));
+                        }
+                    })
+                    .on("mouseout", function (event, d) {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        d3.select(this).attr("fill", value > 0 ? colorScale(value) : "#ccc");
+                    })
+                    .append("title")
+                    .text(d => {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        return `${d.properties.ADMIN || d.properties.name}: ${selectedField.replace("_", " ")} = ${value ? value.toFixed(2) : "No Data"}`;
+                    }),
+                update => update // 更新部分重新绑定事件
+                    .attr("fill", d => {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        return value > 0 ? colorScale(value) : "#ccc";
+                    })
+                    .on("mouseover", function (event, d) {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        if (value > 0) {
+                            const currentColor = d3.color(colorScale(value));
+                            d3.select(this).attr("fill", currentColor.brighter(1.5));
+                        }
+                    })
+                    .on("mouseout", function (event, d) {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        d3.select(this).attr("fill", value > 0 ? colorScale(value) : "#ccc");
+                    })
+                    .select("title")
+                    .text(d => {
+                        const value = countryMap.get(d.properties.ADMIN);
+                        return `${d.properties.ADMIN || d.properties.name}: ${selectedField.replace("_", " ")} = ${value ? value.toFixed(2) : "No Data"}`;
+                    })
+            );
     }
-    
+
     // 初次加载时更新地图
     updateMap();
 
     // 绑定年份选择事件，更新地图
-    d3.selectAll("input[name='yearRadio']").on("change", updateMap);
+    // 绑定年份选择事件，更新地图和柱状图
+    d3.selectAll("input[name='yearRadio']").on("change", function () {
+        updateMap();        // 更新地图
+        if (typeof updateBarChart === "function") {
+            updateBarChart(); // 更新柱状图（确保函数已定义）
+        }
+    });
+
 
     // 绑定字段按钮点击事件，更新地图
     d3.selectAll(".button-container button").on("click", function () {
         d3.selectAll(".button-container button").classed("active", false); // 移除其他按钮的活动状态
         d3.select(this).classed("active", true); // 设置当前按钮为活动状态
         updateMap(); // 更新地图
+        updateBarChart();
     });
 });

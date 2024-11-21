@@ -111,7 +111,6 @@ const dataLoader = {
         const countryMap = new Map(processedData.map(d => [d.country, d.value]));
         // 提取字段值数组
         const values = processedData.map(d => d.value);
-        console.log(countryMap,values);//------------------------------------------------------------------------
         // 返回国家映射和字段值数组
         return { countryMap, values };
     }

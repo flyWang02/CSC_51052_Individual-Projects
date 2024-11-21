@@ -1,167 +1,177 @@
 /* General styles */
 #container {
-    margin: 0 auto;
-    background-color: #e6ebf2;
-    min-height: 99vh;
-  }
-  
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  /* Header styles */
-  .header-content {
-    display: flex; /* 使用 flex 布局 */
-    justify-content: space-between; /* 内容两端对齐 */
-    align-items: center; /* 垂直居中对齐 */
-    padding: 5px 5px; /* 缩小内边距：上下 2px，左右 5px */
-    margin-left: 5px; 
-    margin-right: 150px; 
-    flex-wrap: wrap; /* 自动换行以适应较小屏幕 */
-    line-height: 0.5; /* 设置较小的行高以压缩高度 */
-    min-height: 25px; /* 设置最小高度以确保内容不会过于压缩 */
-  }
-  
-  .tabs {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-  
-  .tab {
-    padding: 10px 15px;
-    background-color: #e0e0e0;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .tab.active {
-    background-color: #4a90e2;
-    color: #fff;
-  }
-  
-  /* Main layout */
-  main {
-    display: flex;
-    margin: 5px;
-    gap: 20px;
-    position: relative;
-    height: calc(100vh - 60px);
-  }
-  
-  /* Left panel */
-  #left-panel {
-    flex: 3;
-    margin-left: 5%;
-    max-width: 70%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  #left-container {
-    min-height: 95%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    background-color: rgb(233, 236, 243); /* 背景颜色为白色 */
-    border-radius: 10px; /* 圆角设置为 8px */
-    margin-bottom: 30px; /* 下方外边距设置为 20px */
-    margin-left: 5px; /* 下方外边距设置为 20px */
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 设置阴影效果，使内容块更具立体感 */
-  }
-  
-  #europe_map{
-    width: 80%; /* 占据父容器的宽度 */
-    margin-left: auto; /* 自动将地图推到容器右边 */
-    position: relative; /* 确保子元素以此为参考定位 */
-    z-index: 1; /* 保持较低的层级 */
+  margin: 0 auto;
+  background-color: #e6ebf2;
+  min-height: 99vh;
 }
 
-  /* Text positioning */
-  #text {
-    position: absolute; /* 绝对定位 */
-    left: 0%; /* 根据需要调整负值，定位到 #europe_map 左侧 */
-    top: 0; /* 与 #europe_map 顶部对齐 */
-    width: 20%; /* 设置宽度 */
-    height: auto; /* 高度自动调整 */
-    display: flex; /* 保持子内容布局 */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Header styles */
+.header-content {
+  display: flex;
+  /* 使用 flex 布局 */
+  justify-content: space-between;
+  /* 内容两端对齐 */
+  align-items: center;
+  /* 垂直居中对齐 */
+  padding: 5px 5px;
+  /* 缩小内边距：上下 2px，左右 5px */
+  margin-left: 5px;
+  margin-right: 280px;
+  flex-wrap: wrap;
+  /* 自动换行以适应较小屏幕 */
+  line-height: 0.5;
+  /* 设置较小的行高以压缩高度 */
+  min-height: 25px;
+  /* 设置最小高度以确保内容不会过于压缩 */
+}
+
+.tabs {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 10px 15px;
+  background-color: #e0e0e0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tab.active {
+  background-color: #4a90e2;
+  color: #fff;
+}
+
+/* Main layout */
+main {
+  display: flex;
+  margin: 5px;
+  gap: 20px;
+  position: relative;
+  height: calc(100vh - 60px);
+}
+
+/* Left panel */
+#left-panel {
+  flex: 3;
+  margin-left: 10%;
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
+#left-container {
+  min-height: 95%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background-color: rgb(233, 236, 243);
+  /* 背景颜色为白色 */
+  border-radius: 10px;
+  /* 圆角设置为 8px */
+  margin-bottom: 30px;
+  /* 下方外边距设置为 20px */
+  margin-left: 5px;
+  /* 下方外边距设置为 20px */
+  box-shadow: 0px 8px 13px rgba(0, 0, 0, 0.2);
+  /* 设置阴影效果，使内容块更具立体感 */
+}
+
+#europe_map {
+  width: 80%;
+  /* 占据父容器的宽度 */
+  margin-left: auto;
+  /* 自动将地图推到容器右边 */
+  position: relative;
+  /* 确保子元素以此为参考定位 */
+  z-index: 1;
+  /* 保持较低的层级 */
+}
+
+/* Text positioning */
+#text {
+  position: absolute;
+  /* 绝对定位 */
+  left: 0%;
+  /* 根据需要调整负值，定位到 #europe_map 左侧 */
+  top: 0;
+  /* 与 #europe_map 顶部对齐 */
+  width: 20%;
+  /* 设置宽度 */
+  height: auto;
+  /* 高度自动调整 */
+  display: flex;
+  /* 保持子内容布局 */
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  z-index: 2;
+  /* 确保其在 #europe_map 之上 */
+}
+
+
+/* Right panel */
+#right-panel {
+  min-height: 97%;
+  position: absolute;
+  right: 10%;
+  top: 25px;
+  width: 22%;
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.2);
+  z-index: 4;
+  overflow-y: auto;
+}
+/* Responsive design */
+@media (max-width: 1024px) {
+  main {
     flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    z-index: 2; /* 确保其在 #europe_map 之上 */
-  }
-  
-  /* Timeline chart */
-  #timeline-chart {
-    height: 140px; /* 设置高度 */
-    width: calc(100% - 18%); /* 宽度减去左右各 20px 的间距 */
-    margin-top: 5%;
-    margin-bottom: 3%;
-    margin-left: 5%;
-    padding: 10px; /* 内边距（可根据需要调整） */
-    background-color: #ffffff; /* 背景颜色 */
-    box-shadow: 0 4px 8px rgba(3, 1, 1, 0.2); /* 添加阴影效果 */
-    border-radius: 10px; /* 可选：圆角效果 */
-  }
-  
-  /* Right panel */
-  #right-panel {
-    min-height: 97%;
-    position: absolute;
-    right: 5%;
-    top: 25px;
-    width: 23%;
-    margin-bottom: 20px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 4;
-    overflow-y: auto;
+    height: auto;
   }
 
-  
-  /* Responsive design */
-  @media (max-width: 1024px) {
-    main {
-      flex-direction: column;
-      height: auto;
-    }
-  
-    #left-panel {
-      margin-left: 20px;
-      max-width: 100%;
-    }
-  
-    #right-panel {
-      position: relative;
-      right: 0;
-      width: 90%;
-      margin: 20px auto;
-      flex: 1; /* 右侧面板保持占比不变 */
-    }
-  
-    #europe_map {
-      position: relative;
-      width: 100%;
-      height: 400px;
-    }
-  
-    #text {
-      position: relative;
-      width: 90%;
-      margin: 20px auto;
-    }
-  
-    #timeline-chart {
-      position: relative;
-      margin: 20px auto;
-    }
+  #left-panel {
+    margin-left: 20px;
+    max-width: 100%;
   }
+
+  #right-panel {
+    position: relative;
+    right: 0;
+    width: 90%;
+    margin: 20px auto;
+    flex: 1;
+    /* 右侧面板保持占比不变 */
+  }
+
+  #europe_map {
+    position: relative;
+    width: 100%;
+    height: 400px;
+  }
+
+  #text {
+    position: relative;
+    width: 90%;
+    margin: 20px auto;
+  }
+
+  #bar-chart {
+    position: relative;
+    margin: 20px auto;
+  }
+}
