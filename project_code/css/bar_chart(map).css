@@ -15,6 +15,7 @@
     /* 添加阴影效果 */
     border-radius: 10px;
     /* 可选：圆角效果 */
+    overflow: hidden; /* 限制溢出，确保局部显示 */
   }
 .bar {
     fill: url(#gradient);
@@ -25,7 +26,7 @@
   
   /* 数值文本样式 */
   .label {
-    font-size: 9px;
+    font-size: 0.5vw;
     /* 文本大小 */
     fill: rgb(44, 3, 54);
     /* 文本颜色 */

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.75, user-scalable=no">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/button.css">
     <link rel="stylesheet" href="../css/bar_chart(map).css">
@@ -14,20 +15,22 @@
     <script src="../js/right_panel_data_script.js"></script>
     <script src="../js/bar_chart(map).js"></script>
     <script src="../js/Dynamic_Fonts.js"></script>
-    <script src="../js/main.js"></script>
 </head>
+
 <body>
     <div id="container">
-        
+
         <main>
             <section id="left-panel">
 
                 <header>
                     <div class="header-content">
                         <div class="logo">
-                            <!-- <img src="../images/logo.png" alt="Affordable and Clean Energy"> -->
-                            <h1>Affordable and Clean Enerooorgy</h1>
+                            <img src="../data/logo.png" style="width: 4vh; height: 4vh;">
+                            <span style="font-size: 1.8vh; color: #a5a8b4; font-weight: bold; margin-left: 10px;">EU
+                                Electricity</span>
                         </div>
+
                         <nav class="tabs">
                             <button class="tab" data-target="electricity-access">Electricity Access</button>
                             <button class="tab" data-target="T1">T1</button>
@@ -38,19 +41,20 @@
 
                 <div id="left-container">
                     <div id="text">
-                        <h1 id="title">Power EU: Visual Analysis of National Electricity Energy in the last 10 years</h1>
-                        <h1 id="title">Electricity Access in Europe</h1>
+                        <span id="title"><span id="title1">Power EU</span> Visual Analysis of National Electricity
+                            Energy in the last 10 years</span>
                         <div class="radio-container"></div>
                         <div id="Dynamic_Text">
-                            <span id="Dynamic_Country" style="font-weight: bold; font-size: 30px; color: #505673;"></span>
-                            <span id="Dynamic_Description" style="font-size: 20px; color: #505673;"></span>
+                            <span id="Dynamic_Country"
+                                style="font-weight: bold; font-size: 3.5vh; color: #505673;"></span>
+                            <span id="Dynamic_Description" style="font-size: 2vh; color: #505673;"></span>
                         </div>
                         <div class="button-container"></div>
                     </div>
                     <div id="europe_map"></div>
                     <div id="bar-chart"></div>
                 </div>
-                
+
             </section>
             <section id="right-panel">
                 <h3>Access to electricity in urban vs rural areas</h3>
@@ -60,6 +64,29 @@
             </section>
         </main>
     </div>
+    <script>
+        (function () {
+            function restrictZoom() {
+                const maxScale = 1.75; // 最大缩放比例
+                const viewportMeta = document.querySelector("meta[name='viewport']");
+
+                if (viewportMeta) {
+                    const scale = window.outerWidth / window.innerWidth;
+                    if (scale > maxScale) {
+                        viewportMeta.setAttribute(
+                            "content",
+                            `width=device-width, initial-scale=1, maximum-scale=${maxScale}`
+                        );
+                    }
+                }
+            }
+
+            window.addEventListener("resize", restrictZoom);
+            window.addEventListener("wheel", restrictZoom); // 捕获缩放事件
+        })();
+    </script>
+
 
 </body>
+
 </html>

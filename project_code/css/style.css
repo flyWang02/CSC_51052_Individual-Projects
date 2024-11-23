@@ -1,17 +1,19 @@
 /* General styles */
-#container {
-  margin: 0 auto;
-  background-color: #e6ebf2;
-  min-height: 99vh;
-}
+
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  background-color: #e6ebf2;
   color: #333;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transform: scale(1);
+  /* 默认缩放 */
+  max-height: 175%;
+  /* 限制内容最大放大比例 */
+  overflow: hidden;
+  /* 防止溢出滚动 */
 }
 
 /* Header styles */
@@ -25,13 +27,19 @@ body {
   padding: 5px 5px;
   /* 缩小内边距：上下 2px，左右 5px */
   margin-left: 5px;
-  margin-right: 280px;
+  margin-right: 22%;
   flex-wrap: wrap;
   /* 自动换行以适应较小屏幕 */
   line-height: 0.5;
   /* 设置较小的行高以压缩高度 */
   min-height: 25px;
   /* 设置最小高度以确保内容不会过于压缩 */
+}
+
+.logo {
+  padding: 10px;
+  display: flex; 
+  align-items: center;
 }
 
 .tabs {
@@ -100,36 +108,14 @@ main {
   /* 保持较低的层级 */
 }
 
-/* Text positioning */
-#text {
-  position: absolute;
-  /* 绝对定位 */
-  left: 0%;
-  /* 根据需要调整负值，定位到 #europe_map 左侧 */
-  top: 0;
-  /* 与 #europe_map 顶部对齐 */
-  width: 20%;
-  /* 设置宽度 */
-  height: auto;
-  /* 高度自动调整 */
-  display: flex;
-  /* 保持子内容布局 */
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-  z-index: 2;
-  /* 确保其在 #europe_map 之上 */
-}
-
-
 /* Right panel */
 #right-panel {
-  min-height: 97%;
+  height: 91vh;
   position: absolute;
-  right: 10%;
+  right: 17vh;
   top: 25px;
   width: 22%;
-  margin-bottom: 20px;
+
   background-color: #fff;
   padding: 20px;
   border-radius: 10px;
@@ -137,6 +123,7 @@ main {
   z-index: 4;
   overflow-y: auto;
 }
+
 /* Responsive design */
 @media (max-width: 1024px) {
   main {
