@@ -211,6 +211,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // 初次加载时绘制柱状图
     updateBarChart();
     window.updateBarChart = updateBarChart;
+    window.addEventListener("resize", updateBarChart);
 
     // 仅绑定更新柱状图的逻辑
     d3.selectAll("input[name='yearRadio']").on("change", updateBarChart);

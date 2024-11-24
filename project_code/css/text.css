@@ -1,0 +1,37 @@
+
+/* Text positioning */
+#text {
+    position: absolute;
+    /* 绝对定位 */
+    left: 2%;
+    /* 根据需要调整负值，定位到 #europe_map 左侧 */
+    top: 3%;
+    /* 与 #europe_map 顶部对齐 */
+    width: 20vw;
+    /* 设置宽度 */
+    height: 60vh;
+    /* 高度自动调整 */
+    display: flex;
+    /* 保持子内容布局 */
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    
+  }
+#title{
+    font-size: 2.8vh;
+    line-height: 3.3vh;
+    color: #495072;
+}
+#title1{
+    font-size: 4.3vh;
+    font-weight: bold;
+    color: #3970f5;
+}
+
+#Dynamic_Text{
+    margin-top: 3vh;
+    padding: 5px;
+    line-height: 3.3vh;
+    margin-bottom: 2vh;
+}
