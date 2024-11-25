@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.75, user-scalable=no">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/button.css">
+    <link rel="stylesheet" href="../css/bar_chart(map).css">
+    <link rel="stylesheet" href="../css/yaerstyle.css">
+    <link rel="stylesheet" href="../css/text.css">
+    <title>Electricity Access Visualization</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="../js/europe_map.js"></script>
+    <script src="../js/dataLoader.js"></script>
+    <script src="../js/right_panel_data_script.js"></script>
+    <script src="../js/bar_chart(map).js"></script>
+    <script src="../js/Dynamic_Fonts.js"></script>
+</head>
+
+<body>
+    <div id="container">
+
+        <main>
+            <section id="left-panel">
+
+                <header>
+                    <div class="header-content">
+                        <div class="logo">
+                            <img src="../data/logo.png" style="width: 4vh; height: 4vh;">
+                            <span style="font-size: 1.8vh; color: #a5a8b4; font-weight: bold; margin-left: 10px;">EU
+                                Electricity</span>
+                        </div>
+
+                        <nav class="tabs">
+                            <button class="tab" data-target="electricity-access">Electricity Access</button>
+                            <button class="tab" data-target="T1">T1</button>
+                            <button class="tab" data-target="T2">T2</button>
+                        </nav>
+                    </div>
+                </header>
+
+                <div id="left-container">
+                    <div id="text">
+                        <span id="title"><span id="title1">Power EU</span> Visual Analysis of National Electricity
+                            Energy in the last 10 years</span>
+                        <div class="radio-container"></div>
+                        <div id="Dynamic_Text">
+                            <span id="Dynamic_Country"
+                                style="font-weight: bold; font-size: 3.5vh; color: #505673;"></span>
+                            <span id="Dynamic_Description" style="font-size: 2vh; color: #505673;"></span>
+                        </div>
+                        <div class="button-container"></div>
+                    </div>
+                    <div id="europe_map"></div>
+                    <div id="bar-chart"></div>
+                </div>
+
+            </section>
+            <section id="right-panel">
+                <div id="country-details">
+                    <!-- Dynamic chart data here -->
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+        (function () {
+            function restrictZoom() {
+                const maxScale = 1.75; // 最大缩放比例
+                const viewportMeta = document.querySelector("meta[name='viewport']");
+
+                if (viewportMeta) {
+                    const scale = window.outerWidth / window.innerWidth;
+                    if (scale > maxScale) {
+                        viewportMeta.setAttribute(
+                            "content",
+                            `width=device-width, initial-scale=1, maximum-scale=${maxScale}`
+                        );
+                    }
+                }
+            }
+
+            window.addEventListener("resize", restrictZoom);
+            window.addEventListener("wheel", restrictZoom); // 捕获缩放事件
+        })();
+    </script>
+
+
+</body>
+
+</html>
