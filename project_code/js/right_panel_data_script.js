@@ -1,10 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function () {
     // 获取容器并设置基础配置
-    const container = d3.select("#right-panel");
-    const margin = {top: 20, right: 20, bottom: 30, left: 40};
-    
-    // 初始化数据
-    const { csvData, europeanCountryNames } = await dataLoader.processData();
     let currentYear = dataLoader.getSelectedYear();
 
     // 创建更新函数

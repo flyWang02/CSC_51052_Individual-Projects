@@ -1,7 +1,6 @@
-// 全局变量
+// 全局变量和部门结构保持不变
 let consumptionData = [];
 
-// 定义部门结构
 const SECTOR_STRUCTURE = {
     industry: {
         name: "Industry",
@@ -39,40 +38,21 @@ const SECTOR_STRUCTURE = {
     }
 };
 
-// 定义颜色方案
 const COLOR_SCHEMES = {
-    industry: [
-        "#08519c", "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", 
-        "#4292c6", "#2171b5", "#084594", "#082c7c", "#08306b",
-        "#2166ac", "#4393c3"
-    ],
-    transport: [
-        "#d94801", "#fd8d3c", "#fdae6b", "#fdd0a2",
-        "#f16913", "#d94801", "#a63603", "#7f2704"
-    ],
-    other: [
-        "#31a354", "#74c476", "#a1d99b", "#c7e9c0",
-        "#238b45", "#006d2c", "#00441b", "#41ab5d"
-    ]
+    industry: ["#08519c", "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#4292c6", "#2171b5", "#084594", "#082c7c", "#08306b", "#2166ac", "#4393c3"],
+    transport: ["#d94801", "#fd8d3c", "#fdae6b", "#fdd0a2", "#f16913", "#d94801", "#a63603", "#7f2704"],
+    other: ["#31a354", "#74c476", "#a1d99b", "#c7e9c0", "#238b45", "#006d2c", "#00441b", "#41ab5d"]
 };
 
-// 加载数据
 async function loadConsumptionData(csvPath) {
-    try {
-        if (consumptionData.length === 0) {
-            const response = await fetch(csvPath);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const csvText = await response.text();
-            consumptionData = d3.csvParse(csvText);
-        }
-        return consumptionData;
-    } catch (error) {
-        console.error("Error loading data:", error);
-        throw error;
+    if (consumptionData.length === 0) {
+        const response = await fetch(csvPath);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        consumptionData = d3.csvParse(await response.text());
     }
+    return consumptionData;
 }
 
-// 处理数据
 function processEUTotalData(data, year) {
     const yearData = data.filter(row => row.TIME_PERIOD === year);
     const sectorData = {};
@@ -98,14 +78,12 @@ function processEUTotalData(data, year) {
             }
         });
 
-        // 按照值从小到大排序，这样堆叠时较大的值会在底部
         sectorData[sectorKey].subsectors.sort((a, b) => a.value - b.value);
     });
 
     return sectorData;
 }
 
-// 创建图表
 function createBarChart(container, data, width, height, margin, year) {
     container.selectAll("*").remove();
 
@@ -114,26 +92,19 @@ function createBarChart(container, data, width, height, margin, year) {
         .attr("height", height + margin.top + margin.bottom)
         .attr("class", "euec-chart-svg")
         .append("g")
-        .attr("class", "euec-chart-container")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // 按总量排序部门
-    const sectors = Object.keys(data)
-        .sort((a, b) => data[b].total - data[a].total);
+    const sectors = Object.keys(data).sort((a, b) => data[b].total - data[a].total);
 
-    // 创建比例尺
     const x = d3.scaleBand()
         .domain(sectors)
         .range([0, width])
         .padding(0.3);
 
-        const y = d3.scaleLinear()
+    const y = d3.scaleLinear()
         .domain([0, Math.max(0, d3.max(Object.values(data), d => d.total))])
         .range([height, 0]);
-        
-    
 
-    // 创建颜色比例尺
     const colorScales = {};
     Object.keys(COLOR_SCHEMES).forEach(sector => {
         colorScales[sector] = d3.scaleOrdinal()
@@ -141,8 +112,13 @@ function createBarChart(container, data, width, height, margin, year) {
             .range(COLOR_SCHEMES[sector]);
     });
 
-    // 创建提示框
-    const tooltip = d3.select("body").append("div")
+    // 创建新的tooltip
+    if (!d3.select("body").select(".euec-tooltip").empty()) {
+        d3.select("body").select(".euec-tooltip").remove();
+    }
+    
+    const tooltip = d3.select("body")
+        .append("div")
         .attr("class", "euec-tooltip")
         .style("opacity", 0)
         .style("position", "absolute")
@@ -153,32 +129,27 @@ function createBarChart(container, data, width, height, margin, year) {
         .style("font-size", "12px")
         .style("box-shadow", "0 2px 8px rgba(0,0,0,0.15)")
         .style("pointer-events", "none")
-        .style("z-index", "1000")
-        .style("display", "none");
+        .style("display", "none")
+        .style("z-index", "1000");
 
-    // 添加标题
     svg.append("text")
         .attr("class", "euec-chart-title")
-        .attr("x", width / 2)
+        .attr("x", width )
         .attr("y", -margin.top / 2)
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
         .style("font-weight", "bold")
         .text(`EU Electricity Consumption by Sectors (${year})`);
 
-    // 添加坐标轴
     svg.append("g")
         .attr("class", "euec-axis-x")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x)
-            .tickFormat(d => data[d].name));
+        .call(d3.axisBottom(x).tickFormat(d => data[d].name));
 
     svg.append("g")
         .attr("class", "euec-axis-y")
-        .call(d3.axisLeft(y)
-            .tickFormat(d => `${d3.format(".2s")(d)} GWh`));
+        .call(d3.axisLeft(y).tickFormat(d => `${d3.format(".2s")(d)} GWh`));
 
-    // 绘制堆叠柱状图
     sectors.forEach(sector => {
         let cumulative = height;
         const sectorGroup = svg.append("g")
@@ -192,7 +163,7 @@ function createBarChart(container, data, width, height, margin, year) {
             .enter()
             .append("rect")
             .attr("class", "euec-bar")
-            .attr("id", (d) => `euec-bar-${sector}-${d.name}`)
+            .attr("id", d => `euec-bar-${sector}-${d.name}`)
             .attr("x", x(sector))
             .attr("y", d => {
                 const barHeight = height - y(d.value);
@@ -204,10 +175,10 @@ function createBarChart(container, data, width, height, margin, year) {
             .attr("fill", d => colorScales[sector](d.name))
             .style("cursor", "pointer")
             .on("mouseover", function(event, d) {
-                d3.select(this)
-                    .style("opacity", 0.8)
-                    .style("stroke", "#000")
-                    .style("stroke-width", 2);
+                const bar = d3.select(this);
+                bar.style("opacity", 0.8)
+                   .style("stroke", "#000")
+                   .style("stroke-width", 2);
 
                 d3.select(`#euec-legend-item-${sector}-${d.name}`)
                     .select("text")
@@ -221,6 +192,7 @@ function createBarChart(container, data, width, height, margin, year) {
 
                 tooltip
                     .style("display", "block")
+                    .style("opacity", 1)
                     .style("left", `${event.pageX + 15}px`)
                     .style("top", `${event.pageY - 15}px`)
                     .html(`
@@ -235,17 +207,14 @@ function createBarChart(container, data, width, height, margin, year) {
                             <span style="color: #666">Share of Sector: </span>
                             <span style="font-weight: bold">${percentage}%</span>
                         </div>
-                    `)
-                    .transition()
-                    .duration(200)
-                    .style("opacity", 0.9);
+                    `);
             })
             .on("mousemove", function(event) {
                 tooltip
                     .style("left", `${event.pageX + 15}px`)
                     .style("top", `${event.pageY - 15}px`);
             })
-            .on("mouseout", function() {
+            .on("mouseout", function(event, d) {
                 d3.select(this)
                     .style("opacity", 1)
                     .style("stroke", "none");
@@ -257,100 +226,109 @@ function createBarChart(container, data, width, height, margin, year) {
                     .select("rect")
                     .style("opacity", 1);
 
-                tooltip.style("display", "none")
-                       .style("opacity", 0);
+                tooltip
+                    .style("opacity", 0)
+                    .style("display", "none");
             });
     });
 
-    // 添加图例
-    let legendY = 0;
-    const itemSpacing = 15;
-    const legendSectorSpacing = 15;
-
-    sectors.forEach((sector, sectorIndex) => {
+    const legendSpacing =17;
+    let currentY = 0;
+    
+    sectors.forEach((sector) => {
         const legend = svg.append("g")
             .attr("class", "euec-legend")
-            .attr("id", `euec-legend-${sector}`);
-
-        if (sectorIndex === 0) {
-            legend.attr("transform", `translate(${width + 20}, ${legendY})`);
-        } else {
-            legend.attr("transform", `translate(${width + 20}, 0)`);
-        }
-
+            .attr("transform", `translate(${width + 16}, 0)`);
+    
+        // 标题项
         legend.append("text")
             .attr("class", "euec-legend-title")
-            .attr("x", 0)
-            .attr("y", sectorIndex === 0 ? 0 : legendY)
+            .attr("transform", `translate(5, ${currentY })`)
             .style("font-weight", "bold")
-            .style("font-size", "14px")
+            .style("font-size", "15px")
             .text(`${data[sector].name} (${d3.format(",.0f")(data[sector].total)} GWh)`);
-
-        legendY += itemSpacing;
-
+        
+        currentY += legendSpacing;
+    
         const sortedSubsectors = [...data[sector].subsectors].reverse();
-
-        sortedSubsectors.forEach((subsector, i) => {
+        sortedSubsectors.forEach((subsector) => {
             const legendItem = legend.append("g")
                 .attr("class", "euec-legend-item")
-                .attr("id", `euec-legend-item-${sector}-${subsector.name}`);
-
-            if (sectorIndex === 0) {
-                legendItem.attr("transform", `translate(5, ${i * itemSpacing + itemSpacing})`);
-            } else {
-                legendItem.attr("transform", `translate(5, ${legendY + i * itemSpacing})`);
-            }
-
+                .attr("id", `euec-legend-item-${sector}-${subsector.name}`)
+                .attr("transform", `translate(5, ${currentY})`)
+                .style("cursor", "pointer");
+    
             legendItem.append("rect")
-                .attr("class", "euec-legend-rect")
                 .attr("width", 12)
                 .attr("height", 12)
+                .attr("y", -9)
                 .attr("fill", colorScales[sector](subsector.name));
-
-            const formattedValue = d3.format(",.0f")(subsector.value);
+    
             legendItem.append("text")
-                .attr("class", "euec-legend-text")
                 .attr("x", 20)
-                .attr("y", 10)
+                .attr("y", 2)
                 .style("font-size", "12px")
-                .style("fill", "#333")
-                .text(`${subsector.name} (${formattedValue} GWh)`);
-
+                .text(`${subsector.name} (${d3.format(",.0f")(subsector.value)} GWh)`);
+    
+            // 交互事件
             legendItem
-                .style("cursor", "pointer")
                 .on("mouseover", function() {
                     d3.select(this).select("text")
                         .style("font-weight", "bold");
                     d3.select(this).select("rect")
                         .style("opacity", 0.8);
-
-                    svg.selectAll(".euec-bar")
-                        .filter(d => d && d.name === subsector.name)
-                        .style("opacity", 0.8)
-                        .style("stroke", "#000")
-                        .style("stroke-width", 1);
+    
+                    const bar = svg.select(`#euec-bar-${sector}-${subsector.name}`);
+                    bar.style("opacity", 0.8)
+                       .style("stroke", "#000")
+                       .style("stroke-width", 1);
+                    
+                    const barNode = bar.node();
+                    const barRect = barNode.getBoundingClientRect();
+                    const percentage = (subsector.value / data[sector].total * 100).toFixed(1);
+    
+                    tooltip
+                        .style("display", "block")
+                        .style("opacity", 1)
+                        .style("left", `${barRect.left + barRect.width / 2}px`)
+                        .style("top", `${barRect.top - 15}px`)
+                        .html(`
+                            <div style="margin-bottom: 8px; font-weight: bold; color: ${colorScales[sector](subsector.name)}; border-bottom: 1px solid #eee; padding-bottom: 4px">
+                                ${data[sector].name} - ${subsector.name}
+                            </div>
+                            <div style="margin-bottom: 4px">
+                                <span style="color: #666">Consumption: </span>
+                                <span style="font-weight: bold">${d3.format(",.0f")(subsector.value)} GWh</span>
+                            </div>
+                            <div>
+                                <span style="color: #666">Share of Sector: </span>
+                                <span style="font-weight: bold">${percentage}%</span>
+                            </div>
+                        `);
                 })
                 .on("mouseout", function() {
                     d3.select(this).select("text")
                         .style("font-weight", "normal");
                     d3.select(this).select("rect")
                         .style("opacity", 1);
-
-                    svg.selectAll(".euec-bar")
-                        .filter(d => d && d.name === subsector.name)
+    
+                    svg.select(`#euec-bar-${sector}-${subsector.name}`)
                         .style("opacity", 1)
                         .style("stroke", "none");
+    
+                    tooltip
+                        .style("opacity", 0)
+                        .style("display", "none");
                 });
+    
+            currentY += legendSpacing;
         });
-
-        legendY += (sortedSubsectors.length * itemSpacing) + legendSectorSpacing;
     });
 }
 
-// 创建并添加柱状图函数
 async function createAndAddBarChart(containerSelector, csvPath, selectedYear) {
     const container = d3.select(containerSelector);
-    const margin = { top: 40, right: 250, bottom: 40, left: 60 };
+    const margin = { top: 40, right: 200, bottom: 40, left: 60 };
     const width = parseInt(container.style("width")) - margin.left - margin.right;
     const height = Math.min(400, parseInt(container.style("height")) - margin.top - margin.bottom);
 
@@ -364,3 +342,5 @@ async function createAndAddBarChart(containerSelector, csvPath, selectedYear) {
     }
 }
 
+// Export for use in other modules
+window.createAndAddBarChart = createAndAddBarChart;
