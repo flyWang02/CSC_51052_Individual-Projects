@@ -4,65 +4,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.75, user-scalable=no">
-    <link rel="stylesheet" href="../css/style.css">
+    <!-- 页面编码设置为 UTF-8，以支持各种语言字符集 -->
+    <!-- 设定视口参数，以适应不同设备的屏幕尺寸，并限制最大缩放比例为1.75，禁止用户缩放 -->
+    <link rel="stylesheet" href="../css/indexstyle.css">
     <link rel="stylesheet" href="../css/button.css">
     <link rel="stylesheet" href="../css/bar_chart(map).css">
     <link rel="stylesheet" href="../css/text.css">
+    <!-- 引入多个 CSS 文件以设置页面的样式 -->
     <title>Electricity Access Visualization</title>
+    <!-- 页面标题 -->
     <script src="https://d3js.org/d3.v6.min.js"></script>
+    <!-- 引入 D3.js 库，用于数据驱动的文档操作 -->
     <script src="../js/europe_map.js"></script>
     <script src="../js/dataLoader.js"></script>
     <script src="../js/right_panel_data_script.js"></script>
     <script src="../js/bar_chart(map).js"></script>
     <script src="../js/Dynamic_Fonts.js"></script>
+    <script src="../js/right_barchart.js"></script>
+    <script src="../js/right_bubblechart.js"></script>
+    <!-- 引入多个 JavaScript 文件来处理地图、数据加载、交互逻辑以及不同图表的功能 -->
 </head>
 
 <body>
     <div id="container">
+        <!-- 页面容器，包含页面的所有内容 -->
 
         <main>
             <section id="left-panel">
+                <!-- 左侧面板，包含页头、文本、地图和柱状图 -->
 
                 <header>
                     <div class="header-content">
                         <div class="logo">
                             <img src="../data/logo.png" style="width: 4vh; height: 4vh;">
-                            <span style="font-size: 1.8vh; color: #a5a8b4; font-weight: bold; margin-left: 10px;">EU
-                                Electricity</span>
+                            <!-- 显示一个 4vh 尺寸的 logo 图片 -->
+                            <span style="font-size: 1.8vh; color: #a5a8b4; font-weight: bold; margin-left: 10px;">EU Electricity</span>
+                            <!-- 标题文字，描述图形内容（EU Electricity） -->
                         </div>
 
                         <nav class="tabs">
+                            <!-- 导航栏，包含切换选项 -->
                             <button class="tab" data-target="electricity-access">Electricity Access</button>
                             <button class="tab" data-target="T1">T1</button>
                             <button class="tab" data-target="T2">T2</button>
+                            <!-- 每个按钮用于切换不同的内容模块 -->
                         </nav>
                     </div>
                 </header>
 
                 <div id="left-container">
+                    <!-- 左侧内容容器，包含文本、地图和柱状图 -->
                     <div id="text">
-                        <span id="title"><span id="title1">Power EU</span> Visual Analysis of National Electricity
-                            Energy in the last 10 years</span>
+                        <span id="title"><span id="title1">Power EU</span> Visual Analysis of National Electricity Energy in the last 10 years</span>
+                        <!-- 显示标题，描述页面的主题和内容 -->
                         <div class="radio-container"></div>
+                        <!-- 单选按钮容器（预留） -->
                         <div id="Dynamic_Text">
-                            <span id="Dynamic_Country"
-                                style="font-weight: bold; font-size: 3.5vh; color: #505673;"></span>
+                            <span id="Dynamic_Country" style="font-weight: bold; font-size: 3.5vh; color: #505673;"></span>
+                            <!-- 用于显示动态变化的国家名称 -->
                             <span id="Dynamic_Description" style="font-size: 2vh; color: #505673;"></span>
+                            <!-- 用于显示动态变化的描述文本 -->
                         </div>
                         <div class="button-container"></div>
+                        <!-- 按钮容器（预留） -->
                     </div>
                     <div id="europe_map"></div>
+                    <!-- 用于显示欧洲地图的容器 -->
                     <div id="bar-chart"></div>
+                    <!-- 用于显示柱状图的容器 -->
                 </div>
 
             </section>
             <section id="right-panel">
-                <div id="country-details">
-                    <!-- Dynamic chart data here -->
-                </div>
+                <!-- 右侧面板，包含气泡图、柱状图和其他图表容器 -->
+                <div id="bubble-chart-container" class="chart-container"></div>
+                <!-- 气泡图容器 -->
+                <div id="bar-chart-container" class="chart-container"></div>
+                <!-- 柱状图容器 -->
+                <!-- 可以在此添加更多图表容器 -->
+                <div id="new-chart-container" class="chart-container"></div>
+                <!-- 新的图表容器，预留空间添加更多图表 -->
             </section>
         </main>
     </div>
+
+    <!-- 右侧面板的样式 -->
+    <style>
+        #right-panel {
+            display: grid;
+            grid-template-rows: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 10px;
+            height: 100%;
+            /* 使用 CSS 网格布局，将各图表容器分为相同大小的单元格 */
+        }
+        #bubble-chart-container {
+            height: 33.33% ; /* 增加高度，从 33.33% 调整为 50% */
+            width: 100%;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+
+        .chart-container {
+            width: 100%;
+
+        }
+
+
+
+    </style>
+
+    <!-- 通过 JavaScript 代码限制缩放行为 -->
     <script>
         (function () {
             function restrictZoom() {
@@ -80,12 +132,11 @@
                 }
             }
 
+            // 监听窗口变化和鼠标滚轮事件，限制缩放
             window.addEventListener("resize", restrictZoom);
-            window.addEventListener("wheel", restrictZoom); // 捕获缩放事件
+            window.addEventListener("wheel", restrictZoom);
         })();
     </script>
-
-
 </body>
 
 </html>
