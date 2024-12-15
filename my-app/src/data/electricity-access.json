@@ -1,0 +1,31 @@
+{
+  "timeline": [
+    {"year": 2000, "value": 73},
+    {"year": 2005, "value": 76},
+    {"year": 2010, "value": 80},
+    {"year": 2015, "value": 85},
+    {"year": 2019, "value": 90}
+  ],
+  "ruralUrban": [
+    {
+      "country": "South Sudan",
+      "rural": 15,
+      "urban": 45
+    },
+    {
+      "country": "Chad",
+      "rural": 22,
+      "urban": 58
+    },
+    {
+      "country": "Liberia",
+      "rural": 18,
+      "urban": 52
+    },
+    {
+      "country": "Central African Republic",
+      "rural": 12,
+      "urban": 48
+    }
+  ]
+}

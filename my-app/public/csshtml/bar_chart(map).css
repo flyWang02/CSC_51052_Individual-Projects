@@ -1,0 +1,58 @@
+/* bar chart */
+#bar-chart{
+    height: 18%;
+    /* 设置高度 */
+    width: calc(100% - 28%);
+    /* 宽度减去左右各 20px 的间距 */
+    margin-top: 2%;
+    margin-bottom: 2%;
+    margin-left: 3%;
+    padding: 10px;
+    /* 内边距（可根据需要调整） */
+    background-color: #ffffff;
+    /* 背景颜色 */
+    box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.2);
+    /* 添加阴影效果 */
+    border-radius: 10px;
+    /* 可选：圆角效果 */
+    overflow: hidden; /* 限制溢出，确保局部显示 */
+  }
+.bar {
+    fill: url(#gradient);
+    /* 渐变填充 */
+    stroke: none;
+    /* 无边框 */
+  }
+  
+  /* 数值文本样式 */
+  .label {
+    font-size: 0.5vw;
+    /* 文本大小 */
+    fill: rgb(44, 3, 54);
+    /* 文本颜色 */
+    font-weight: bold;
+    /* 加粗 */
+  }
+  
+  /* X 轴上的国旗样式 */
+  .tick image {
+    width: 20px;
+    height: 15px;
+  }
+  
+  /* SVG 渐变定义 */
+  svg defs {
+    pointer-events: none;
+  }
+/* 鼠标悬浮框 */
+  #tooltip {
+    position: absolute;
+    visibility: hidden;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    padding: 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }

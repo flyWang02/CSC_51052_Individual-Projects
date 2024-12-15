@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.75, user-scalable=no">
+    <link rel="stylesheet" href="../csshtml/indexstyle.css">
+    <link rel="stylesheet" href="../csshtml/button.css">
+    <link rel="stylesheet" href="../csshtml/bar_chart(map).css">
+    <link rel="stylesheet" href="../csshtml/text.css">
+    <title>Electricity Access Visualization</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        /* React Navbar 样式 */
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2196f3;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: #2196f3;
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        .nav-link.active {
+            color: #2196f3;
+            background-color: rgba(33, 150, 243, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-container {
+                padding: 0 16px;
+            }
+            
+            .navbar-logo {
+                font-size: 1.1rem;
+            }
+            
+            .navbar-links {
+                gap: 16px;
+            }
+            
+            .nav-link {
+                padding: 6px 10px;
+            }
+        }
+
+        /* 调整原有容器以适应新导航栏 */
+        #container {
+            padding-top: 0;
+        }
+
+        main {
+            height: calc(100vh - 64px);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <main>
+            <section id="left-panel">
+                <header>
+                    <div class="header-content">
+                        
+                        <div class="logo">
+                            <img src="../data/logo.png" style="width: 4vh; height: 4vh;">
+                            <span style="font-size: 1.8vh; color: #a5a8b4; font-weight: bold; margin-left: 10px;">EU Electricity</span>
+                        </div>
+                        <div class="navbar-links">
+                            <a href="/" class="nav-link">Directory</a>
+                            <a href="/country" class="nav-link">Dashboard</a>
+                            <a href="#" class="nav-link active">Electricity Access</a>
+                        </div>
+                    </div>
+                </header>
+
+                <div id="left-container">
+                    <div id="text">
+                        <span id="title"><span id="title1">Power EU</span> Visual Analysis of National Electricity Energy in the last 10 years</span>
+                        <div class="radio-container"></div>
+                        <div id="Dynamic_Text">
+                            <span id="Dynamic_Country" style="font-weight: bold; font-size: 3.5vh; color: #505673;"></span>
+                            <span id="Dynamic_Description" style="font-size: 2vh; color: #505673;"></span>
+                        </div>
+                        <div class="button-container"></div>
+                    </div>
+                    <div id="europe_map"></div>
+                    <div id="bar-chart"></div>
+                </div>
+            </section>
+            
+            <section id="right-panel">
+                <div id="bubble-chart-container" class="chart-container"></div>
+                <div id="bar-chart-container" class="chart-container"></div>
+            </section>
+        </main>
+    </div>
+
+    <style>
+        #right-panel {
+            display: grid;
+            grid-template-rows: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 10px;
+            height: 100%;
+        }
+        #bubble-chart-container {
+            height: 33.33%;
+            width: 100%;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .chart-container {
+            width: 100%;
+        }
+    </style>
+
+    <script>
+                // 导航栏交互功能
+                document.addEventListener('DOMContentLoaded', function() {
+            // 处理导航链接点击
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // 如果是当前页面，阻止默认行为
+                    if (this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        return;
+                    }
+                });
+            });
+        });
+
+                // 设置当前页面对应的标签为激活状态
+        document.addEventListener('DOMContentLoaded', function() {
+        const pathname = window.location.pathname;
+        const tabs = document.querySelectorAll('.tab');
+        
+            tabs.forEach(tab => {
+                const href = tab.getAttribute('href');
+                if (pathname === href || 
+                    (pathname.includes('electricity-access') && href === '/electricity-access') ||
+                    (pathname === '/' && href === '/') ||
+                    (pathname.includes('country') && href === '/country')) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+        });
+        // dataLoader.js
+        const dataLoader = {
+            dataPaths: {
+                csv: "../data/csv/EU_with_Final_Consumption&Gross_electricity_production.csv"
+            },
+
+            loadCSV: function () {
+                return d3.csv(this.dataPaths.csv);
+            },
+
+            getEuropeanCountries: async function () {
+                const csvData = await this.loadCSV();
+                const uniqueCountries = Array.from(new Set(csvData.map(d => d.geo)));
+                return uniqueCountries;
+            },
+            
+            processData: async function () {
+                const csvData = await this.loadCSV();
+                const europeanCountryNames = await this.getEuropeanCountries();
+                const groupedData = d3.group(csvData, d => d.TIME_PERIOD);
+                const timePeriods = Array.from(groupedData.keys());
+                return {
+                    csvData,
+                    timePeriods,
+                    europeanCountryNames
+                };
+            },
+
+            createYearSelector: function (timePeriods, containerSelector) {
+                const container = d3.select(containerSelector);
+                timePeriods.forEach((period) => {
+                    const isChecked = period === "2014";
+                    const radioItem = container.append("div").attr("class", "radio-item");
+                    radioItem.append("input")
+                        .attr("type", "radio")
+                        .attr("name", "yearRadio")
+                        .attr("value", period)
+                        .attr("id", `radio-${period}`)
+                        .attr("checked", isChecked ? true : null);
+                    radioItem.append("label")
+                        .attr("for", `radio-${period}`)
+                        .text(period);
+                });
+            },
+
+            createFieldSelector: function (fields, containerSelector, defaultField) {
+                const container = d3.select(containerSelector);
+                fields.forEach((field) => {
+                    const button = container.append("button")
+                        .attr("id", field)
+                        .classed("active", field === defaultField)
+                        .text(field.replace("_", " "));
+                });
+            },
+
+            getSelectedYear: function () {
+                const selected = document.querySelector("input[name='yearRadio']:checked");
+                return selected ? selected.value : "2014";
+            },
+
+            getSelectedField: function () {
+                const activeButton = d3.select("button.active");
+                return activeButton.empty() ? null : activeButton.attr("id");
+            },
+
+            filterDataByYearAndField: function (csvData, year, field, europeanCountryNames) {
+                const yearData = csvData.filter(d => d.TIME_PERIOD === year);
+                const countryData = yearData.filter(d => europeanCountryNames.includes(d.geo));
+                const processedData = countryData.map(d => ({
+                    country: d.geo,
+                    value: +d[field]
+                })).filter(d => d.value > 0);
+                const countryMap = new Map(processedData.map(d => [d.country, d.value]));
+                const values = processedData.map(d => d.value);
+                return { countryMap, values };
+            }
+        };
+
+        // Dynamic_Fonts.js
+        async function updateDynamicText() {
+            try {
+                const { csvData, timePeriods, europeanCountryNames } = await dataLoader.processData();
+                const currentYear = dataLoader.getSelectedYear();
+                const currentField = dataLoader.getSelectedField();
+                const { countryMap, values } = dataLoader.filterDataByYearAndField(
+                    csvData, 
+                    currentYear, 
+                    currentField, 
+                    europeanCountryNames
+                );
+                let maxValue = Math.max(...values);
+                const topCountry = Array.from(countryMap.entries())
+                    .find(([country, value]) => value === maxValue)[0];
+                const fieldDescription = currentField.includes('Final_Consumption') 
+                    ? 'electricity consumption'
+                    : 'electricity generation';
+                const countryElement = document.getElementById('Dynamic_Country');
+                const descriptionElement = document.getElementById('Dynamic_Description');
+                countryElement.textContent = topCountry;
+                descriptionElement.textContent = ` was the country with the highest ${fieldDescription} in ${currentYear}`;
+            } catch (error) {
+                console.error('Error updating dynamic text:', error);
+            }
+        }
+
+        function setupDynamicTextListeners() {
+            document.querySelectorAll('input[name="yearRadio"]').forEach(radio => {
+                radio.addEventListener('change', updateDynamicText);
+            });
+            document.querySelectorAll('#field-selector button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('#field-selector button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    updateDynamicText();
+                });
+            });
+        }
+
+        // europe_map.js 的完整实现
+        document.addEventListener("DOMContentLoaded", async function () {
+            const container = d3.select("#europe_map");
+
+            const svg = container.append("svg")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("viewBox", `0 0 600 345`)
+                .attr("preserveAspectRatio", "xMidYMid meet")
+                .style("overflow", "visible");
+
+            const defs = svg.append("defs");
+            const c_x = 250;
+            const c_y = 185;
+            const c_r = 165;
+
+            defs.append("clipPath")
+                .attr("id", "circle-clip")
+                .append("circle")
+                .attr("cx", c_x)
+                .attr("cy", c_y)
+                .attr("r", c_r);
+
+            const ringGradient = defs
+                .append("linearGradient")
+                .attr("id", "ring-gradient")
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "0%")
+                .attr("y2", "100%");
+
+            ringGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "#e1e6ee")
+                .attr("stop-opacity", 0.8);
+
+            ringGradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", "#B0C4DE")
+                .attr("stop-opacity", 0);
+
+            svg.append("circle")
+                .attr("cx", c_x)
+                .attr("cy", c_y)
+                .attr("r", c_r)
+                .attr("fill", "#f7f8fb");
+ 
+            svg.append("circle")
+                .attr("cx", c_x)
+                .attr("cy", c_y + 5)
+                .attr("r", c_r + 20)
+                .attr("fill", "none")
+                .attr("stroke", "url(#ring-gradient)")
+                .attr("stroke-width", 10);
+
+            const { csvData, timePeriods, europeanCountryNames } = await dataLoader.processData();
+
+            dataLoader.createYearSelector(timePeriods, "#text .radio-container");
+            dataLoader.createFieldSelector(
+                ["Gross_electricity_production", "Final_consumption"], 
+                "#text .button-container", 
+                "Gross_electricity_production"
+            );
+
+            const worldData = await d3.json("../data/countries.geojson");
+
+            const projection = d3.geoMercator()
+                .center([20, 55])
+                .scale(200)
+                .translate([c_x + 20, c_y]);
+
+            const path = d3.geoPath().projection(projection);
+
+            const clippedGroup = svg.append("g")
+                .attr("clip-path", "url(#circle-clip)");
+
+            clippedGroup.selectAll(".background-path")
+                .data(worldData.features)
+                .enter()
+                .append("path")
+                .attr("class", "background-path")
+                .attr("d", path)
+                .attr("fill", "#d3d3d3")
+                .attr("stroke", "#e9e9e9")
+                .attr("stroke-width", 0.5)
+                .attr("fill-opacity", 0.3);
+
+            const europeanCountries = worldData.features.filter(d =>
+                europeanCountryNames.includes(d.properties.ADMIN)
+            );
+
+            function updateMap() {
+                const selectedYear = dataLoader.getSelectedYear();
+                let selectedField = dataLoader.getSelectedField();
+
+                if (!selectedField) {
+                    selectedField = "Gross_electricity_production";
+                }
+
+                const { countryMap, values } = dataLoader.filterDataByYearAndField(
+                    csvData,
+                    selectedYear,
+                    selectedField,
+                    europeanCountryNames
+                );
+
+                const colorScale = d3.scaleLinear()
+                    .domain([d3.min(values), (d3.min(values) + d3.max(values)) / 2, d3.max(values)])
+                    .range(["#89CFF0", "#00008B", "#4B0082"]);
+
+                clippedGroup.selectAll(".europe-path")
+                    .data(europeanCountries)
+                    .join(
+                        enter => enter.append("path")
+                            .attr("class", "europe-path")
+                            .attr("d", path)
+                            .attr("fill", d => {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                return value > 0 ? colorScale(value) : "#ccc";
+                            })
+                            .attr("stroke", "#fff")
+                            .attr("stroke-width", 0.5)
+                            .on("mouseover", function (event, d) {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                if (value > 0) {
+                                    const currentColor = d3.color(colorScale(value));
+                                    d3.select(this).attr("fill", currentColor.brighter(1.5));
+                                }
+                            })
+                            .on("mouseout", function (event, d) {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                d3.select(this).attr("fill", value > 0 ? colorScale(value) : "#ccc");
+                            })
+                            .append("title")
+                            .text(d => {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                return `${d.properties.ADMIN || d.properties.name}: ${selectedField.replace("_", " ")} = ${value ? value.toFixed(2) : "No Data"}`;
+                            }),
+                        update => update
+                            .attr("fill", d => {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                return value > 0 ? colorScale(value) : "#ccc";
+                            })
+                            .on("mouseover", function (event, d) {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                if (value > 0) {
+                                    const currentColor = d3.color(colorScale(value));
+                                    d3.select(this).attr("fill", currentColor.brighter(1.5));
+                                }
+                            })
+                            .on("mouseout", function (event, d) {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                d3.select(this).attr("fill", value > 0 ? colorScale(value) : "#ccc");
+                            })
+                            .select("title")
+                            .text(d => {
+                                const value = countryMap.get(d.properties.ADMIN);
+                                return `${d.properties.ADMIN || d.properties.name}: ${selectedField.replace("_", " ")} = ${value ? value.toFixed(2) : "No Data"}`;
+                            })
+                    );
+            }
+
+            updateMap();
+
+            d3.selectAll("input[name='yearRadio']").on("change", function () {
+                updateMap();
+                if (typeof updateBarChart === "function") {
+                    updateBarChart();
+                }
+            });
+
+            d3.selectAll(".button-container button").on("click", function () {
+                d3.selectAll(".button-container button").classed("active", false);
+                d3.select(this).classed("active", true);
+                updateMap();
+                updateBarChart();
+            });
+        });
+        // 集成 bar_chart(map).js
+        document.addEventListener("DOMContentLoaded", async function () {
+            // 定义容器和边距
+            const container = d3.select("#bar-chart");
+            const margin = { top: 5, right: 25, bottom: 30, left: 30 };
+            let isInitialLoad = true;
+
+            // 国家与国旗的映射
+            const countryFlags = {
+                "Austria": "https://flagcdn.com/at.svg",
+                "Belgium": "https://flagcdn.com/be.svg",
+                "Bulgaria": "https://flagcdn.com/bg.svg",
+                "Croatia": "https://flagcdn.com/hr.svg",
+                "Denmark": "https://flagcdn.com/dk.svg",
+                "Estonia": "https://flagcdn.com/ee.svg",
+                "Finland": "https://flagcdn.com/fi.svg",
+                "France": "https://flagcdn.com/fr.svg",
+                "Germany": "https://flagcdn.com/de.svg",
+                "Greece": "https://flagcdn.com/gr.svg",
+                "Hungary": "https://flagcdn.com/hu.svg",
+                "Ireland": "https://flagcdn.com/ie.svg",
+                "Italy": "https://flagcdn.com/it.svg",
+                "Latvia": "https://flagcdn.com/lv.svg",
+                "Lithuania": "https://flagcdn.com/lt.svg",
+                "Luxembourg": "https://flagcdn.com/lu.svg",
+                "Malta": "https://flagcdn.com/mt.svg",
+                "Netherlands": "https://flagcdn.com/nl.svg",
+                "Norway": "https://flagcdn.com/no.svg",
+                "Poland": "https://flagcdn.com/pl.svg",
+                "Portugal": "https://flagcdn.com/pt.svg",
+                "Romania": "https://flagcdn.com/ro.svg",
+                "Slovakia": "https://flagcdn.com/sk.svg",
+                "Slovenia": "https://flagcdn.com/si.svg",
+                "Spain": "https://flagcdn.com/es.svg",
+                "Sweden": "https://flagcdn.com/se.svg"
+            };
+
+            // 加载数据并进行预处理
+            const { csvData, europeanCountryNames } = await dataLoader.processData();
+
+            // 定义更新柱状图的函数
+            function updateBarChart() {
+                const selectedYear = dataLoader.getSelectedYear();
+                let selectedField = dataLoader.getSelectedField();
+                if (!selectedField) {
+                    selectedField = "Gross_electricity_production";
+                }
+
+                const { countryMap, values } = dataLoader.filterDataByYearAndField(
+                    csvData,
+                    selectedYear,
+                    selectedField,
+                    europeanCountryNames
+                );
+                const data = Array.from(countryMap.entries()).map(([country, value]) => ({ country, value }));
+
+                const containerWidth = parseInt(container.style("width")) - margin.left - margin.right;
+                const containerHeight = parseInt(container.style("height")) - margin.top - margin.bottom;
+                const width = Math.max(containerWidth, 100);
+                const height = Math.max(containerHeight, 100);
+
+                container.selectAll("*").remove();
+
+                const svg = container.append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                const x = d3.scaleBand()
+                    .domain(data.map(d => d.country))
+                    .range([0, width])
+                    .padding(0.2);
+
+                const y = d3.scaleLog()
+                    .domain([Math.max(1, d3.min(values)), d3.max(values) * 1.5])
+                    .range([height, 0]);
+
+                const tooltip = d3.select("body").append("div")
+                    .attr("id", "tooltip")
+                    .style("position", "absolute")
+                    .style("visibility", "hidden")
+                    .style("background", "#fff")
+                    .style("border", "1px solid #ccc")
+                    .style("padding", "5px")
+                    .style("border-radius", "3px")
+                    .style("pointer-events", "none")
+                    .style("font-size", "12px")
+                    .style("box-shadow", "0 4px 8px rgba(0, 0, 0, 0.1)");
+
+                svg.selectAll(".bar")
+                    .data(data, d => d.country)
+                    .join(
+                        enter => enter.append("rect")
+                            .attr("class", "bar")
+                            .attr("x", d => x(d.country))
+                            .attr("y", isInitialLoad ? d => y(d.value) : height)
+                            .attr("width", x.bandwidth())
+                            .attr("height", isInitialLoad ? d => height - y(d.value) : 0)
+                            .attr("fill", "#4a90e2")
+                            .on("mouseover", (event, d) => {
+                                tooltip.style("visibility", "visible")
+                                    .html(`<strong>${d.country}</strong><br>${selectedField.replace("_", " ")}: ${d.value.toLocaleString()} GWh`);
+                            })
+                            .on("mousemove", (event) => {
+                                tooltip.style("top", `${event.pageY - 10}px`)
+                                    .style("left", `${event.pageX + 10}px`);
+                            })
+                            .on("mouseout", () => {
+                                tooltip.style("visibility", "hidden");
+                            })
+                            .call(enter => {
+                                if (!isInitialLoad) {
+                                    enter.transition()
+                                        .duration(750)
+                                        .attr("y", d => y(d.value))
+                                        .attr("height", d => height - y(d.value));
+                                }
+                            }),
+                        update => update
+                            .call(update => update.transition()
+                                .duration(750)
+                                .attr("y", d => y(d.value))
+                                .attr("height", d => height - y(d.value)))
+                            .on("mouseover", (event, d) => {
+                                tooltip.style("visibility", "visible")
+                                    .html(`<strong>${d.country}</strong><br>${selectedField.replace("_", " ")}: ${d.value.toLocaleString()} GWh`);
+                            })
+                            .on("mousemove", (event) => {
+                                tooltip.style("top", `${event.pageY - 10}px`)
+                                    .style("left", `${event.pageX + 10}px`);
+                            })
+                            .on("mouseout", () => {
+                                tooltip.style("visibility", "hidden");
+                            }),
+                        exit => exit
+                            .call(exit => exit.transition()
+                                .duration(750)
+                                .attr("y", height)
+                                .attr("height", 0)
+                                .remove())
+                    );
+
+                svg.selectAll(".label")
+                    .data(data, d => d.country)
+                    .join(
+                        enter => enter.append("text")
+                            .attr("class", "label")
+                            .attr("x", d => x(d.country) + x.bandwidth() / 2)
+                            .attr("y", isInitialLoad ? d => y(d.value) - 5 : height)
+                            .attr("text-anchor", "middle")
+                            .text(d => d.value.toFixed(1))
+                            .call(enter => {
+                                if (!isInitialLoad) {
+                                    enter.transition()
+                                        .duration(750)
+                                        .attr("y", d => y(d.value) - 5);
+                                }
+                            }),
+                        update => update
+                            .call(update => update.transition()
+                                .duration(750)
+                                .attr("y", d => y(d.value) - 5)
+                                .text(d => d.value.toFixed(1))),
+                        exit => exit
+                            .call(exit => exit.transition()
+                                .duration(750)
+                                .attr("y", height)
+                                .remove())
+                    );
+
+                svg.append("g")
+                    .attr("transform", `translate(0, ${height})`)
+                    .call(d3.axisBottom(x).tickSize(0).tickFormat(() => ""))
+                    .selectAll(".tick")
+                    .data(data)
+                    .join("g")
+                    .attr("transform", d => `translate(${x(d.country) + x.bandwidth() / 2}, 0)`)
+                    .append("image")
+                    .attr("xlink:href", d => countryFlags[d.country] || "")
+                    .attr("width", 20)
+                    .attr("height", 15)
+                    .attr("y", 5)
+                    .attr("x", -10);
+
+                svg.append("defs")
+                    .append("linearGradient")
+                    .attr("id", "gradient")
+                    .attr("x1", "0%")
+                    .attr("y1", "0%")
+                    .attr("x2", "0%")
+                    .attr("y2", "100%")
+                    .selectAll("stop")
+                    .data([
+                        { offset: "0%", color: "#85a2e8" },
+                        { offset: "60%", color: "#2563eb" },
+                        { offset: "100%", color: "#1d4ed8" }
+                    ])
+                    .enter()
+                    .append("stop")
+                    .attr("offset", d => d.offset)
+                    .attr("stop-color", d => d.color);
+
+                isInitialLoad = false;
+            }
+
+            // 初次加载时绘制柱状图
+            updateBarChart();
+            window.updateBarChart = updateBarChart;
+            window.addEventListener("resize", updateBarChart);
+
+            // 绑定更新事件
+            d3.selectAll("input[name='yearRadio']").on("change", updateBarChart);
+            d3.selectAll(".button-container button").on("click", updateBarChart);
+        });
+
+// Add these scripts after your existing code in the <script> tag
+
+// First, add the right_panel_data_script.js implementation
+document.addEventListener('DOMContentLoaded', async function () {
+    let currentYear = dataLoader.getSelectedYear();
+
+    async function updateRightPanel() {
+        const selectedYear = dataLoader.getSelectedYear();
+        console.log(selectedYear);
+        
+        if (currentYear !== selectedYear) {
+            currentYear = selectedYear;
+        }
+        
+        d3.select("#bubble-chart-container").selectAll("*").remove();
+        d3.select("#bar-chart-container").selectAll("*").remove();
+
+        if (typeof window.createAndAddBubbleChart === 'function') {
+            await window.createAndAddBubbleChart("#bubble-chart-container", '../data/csv/ALLdata.csv', currentYear);
+        } else {
+            console.error("createAndAddBubbleChart function is not defined");
+        }
+
+        if (typeof window.createAndAddBarChart === 'function') {
+            await window.createAndAddBarChart("#bar-chart-container", '../data/csv/ALLdata.csv', currentYear);
+        } else {
+            console.error("createAndAddBarChart function is not defined");
+        }
+    }
+
+    updateRightPanel();
+    
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('input[name="yearRadio"]')) {
+            updateRightPanel();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.button-container button')) {
+            updateRightPanel();
+        }
+    });
+
+    window.addEventListener("resize", () => {
+        requestAnimationFrame(updateRightPanel);
+    });
+
+    window.updateRightPanel = updateRightPanel;
+});
+
+// Next, add the right_bubblechart.js implementation
+function createAndAddBubbleChart(containerSelector, csvPath, selectedYear) {
+    const container = d3.select(containerSelector);
+    
+    const theme = {
+        colors: {
+            primary: "#4a90e2",
+            hover: "#2171d3",
+            background: "#fff",
+            text: "#333"
+        },
+        fontSizes: {
+            title: "14px",
+            axis: "10px",
+            label: "12px"
+        },
+        transition: "all 0.3s ease"
+    };
+
+    container
+        .style("width", "100%")
+        .style("position", "relative")
+        .style("margin-bottom", "10px")
+        .style("background", theme.colors.background);
+    
+    const tooltip = container.append("div")
+        .style("position", "absolute")
+        .style("opacity", "0")
+        .style("background", "rgba(255, 255, 255, 0.95)")
+        .style("padding", "8px 12px")
+        .style("border", "1px solid #ddd")
+        .style("border-radius", "4px")
+        .style("pointer-events", "none")
+        .style("font-size", theme.fontSizes.label)
+        .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+        .style("transition", theme.transition)
+        .style("z-index", "100")
+        .style("max-width", "200px");
+
+    const processData = (energyData) => {
+        const yearData = energyData.filter(d => d.TIME_PERIOD === selectedYear);
+        const countryData = new Map();
+        
+        yearData.forEach(d => {
+            const country = d.geo;
+            if (!countryData.has(country)) {
+                countryData.set(country, {
+                    country,
+                    exports: 0,
+                    imports: 0,
+                    production: 0,
+                    consumption: 0
+                });
+            }
+            const value = +d.OBS_VALUE;
+            const data = countryData.get(country);
+            
+            switch (d.nrg_bal) {
+                case 'Exports': data.exports = value; break;
+                case 'Imports': data.imports = value; break;
+                case 'Net electricity production': data.production = value; break;
+                case 'Final consumption': data.consumption = value; break;
+            }
+        });
+
+        return Array.from(countryData.values())
+            .map(d => ({
+                country: d.country,
+                selfSufficiency: (d.production / d.consumption * 100) || 0,
+                dependencyRate: ((d.imports - d.exports) / d.consumption * 100) || 0,
+                importVolume: d.imports
+            }))
+            .filter(d => !isNaN(d.selfSufficiency) && 
+                        !isNaN(d.dependencyRate) && 
+                        !isNaN(d.importVolume) &&
+                        d.selfSufficiency !== 0 &&
+                        d.dependencyRate !== 0);
+    };
+
+    d3.csv(csvPath).then(energyData => {
+        const dependencyData = processData(energyData);
+        
+        if (!dependencyData.length) {
+            container.html(`<div style="text-align: center; padding: 20px; color: #666;">No data available for year ${selectedYear}</div>`);
+            return;
+        }
+
+        const chartBounds = container.node().getBoundingClientRect();
+        const margin = {
+            top: chartBounds.height * 0.1,
+            right: chartBounds.width * 0.1,
+            bottom: chartBounds.height * 0.15,
+            left: chartBounds.width * 0.15
+        };
+        const width = chartBounds.width - margin.left - margin.right;
+        const height = chartBounds.height - margin.top - margin.bottom;
+
+        container.selectAll("svg").remove();
+
+        const svg = container.append("svg")
+            .style("width", "100%")
+            .style("height", "100%")
+            .attr("viewBox", `0 0 ${chartBounds.width} ${chartBounds.height}`)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+        
+        const chartGroup = svg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const xScale = d3.scaleLinear()
+            .domain([0, d3.max(dependencyData, d => d.selfSufficiency) * 1.1])
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([
+                Math.min(0, d3.min(dependencyData, d => d.dependencyRate) * 1.1),
+                d3.max(dependencyData, d => d.dependencyRate) * 1.1
+            ])
+            .range([height, 0]);
+
+        const rScale = d3.scaleSqrt()
+            .domain([0, d3.max(dependencyData, d => d.importVolume)])
+            .range([5, Math.min(width, height) * 0.05]);
+
+        // Add grid lines
+        chartGroup.append("g")
+            .attr("class", "grid")
+            .selectAll("line")
+            .data(xScale.ticks(5))
+            .enter().append("line")
+            .attr("x1", d => xScale(d))
+            .attr("x2", d => xScale(d))
+            .attr("y1", 0)
+            .attr("y2", height)
+            .style("stroke", "#e0e0e0")
+            .style("stroke-dasharray", "3,3");
+
+        chartGroup.append("g")
+            .attr("class", "grid")
+            .selectAll("line")
+            .data(yScale.ticks(5))
+            .enter().append("line")
+            .attr("x1", 0)
+            .attr("x2", width)
+            .attr("y1", d => yScale(d))
+            .attr("y2", d => yScale(d))
+            .style("stroke", "#e0e0e0")
+            .style("stroke-dasharray", "3,3");
+
+        // Add axes
+        chartGroup.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale).ticks(5).tickFormat(d => d + "%"))
+            .style("font-size", theme.fontSizes.axis);
+        
+        chartGroup.append("g")
+            .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + "%"))
+            .style("font-size", theme.fontSizes.axis);
+
+        // Add labels
+        chartGroup.append("text")
+            .attr("x", width / 2)
+            .attr("y", height + margin.bottom * 0.7)
+            .style("text-anchor", "middle")
+            .style("font-size", theme.fontSizes.label)
+            .text("Energy Self-Sufficiency Rate (%)");
+
+        chartGroup.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2)
+            .attr("y", -margin.left * 0.7)
+            .style("text-anchor", "middle")
+            .style("font-size", theme.fontSizes.label)
+            .text("Energy Dependency Rate (%)");
+
+        chartGroup.append("text")
+            .attr("x", width / 2)
+            .attr("y", -margin.top / 2)
+            .style("text-anchor", "middle")
+            .style("font-size", theme.fontSizes.title)
+            .style("font-weight", "bold")
+            .text(`Energy Relations ${selectedYear}`);
+
+        // Add bubbles
+        const bubbles = chartGroup.selectAll("circle")
+            .data(dependencyData)
+            .join("circle")
+            .attr("cx", d => xScale(d.selfSufficiency))
+            .attr("cy", d => Math.max(0, yScale(d.dependencyRate)))
+            .attr("r", d => rScale(d.importVolume))
+            .style("fill", theme.colors.primary)
+            .style("fill-opacity", "0.6")
+            .style("stroke", theme.colors.hover)
+            .style("stroke-width", "1px")
+            .style("transition", theme.transition);
+
+        // Add interactivity
+        bubbles
+            .on("mouseover", function(event, d) {
+                d3.select(this)
+                    .style("fill-opacity", "0.8")
+                    .style("stroke-width", "2px")
+                    .style("cursor", "pointer");
+                
+                const circleBox = this.getBoundingClientRect();
+                const chartBox = container.node().getBoundingClientRect();
+                
+                tooltip
+                    .style("opacity", "1")
+                    .style("left", `${circleBox.left - chartBox.left + circleBox.width/2}px`)
+                    .style("top", `${circleBox.top - chartBox.top - 60}px`)
+                    .style("transform", "translateX(-50%)")
+                    .html(`
+                        <strong>${d.country}</strong><br/>
+                        Self-Sufficiency: ${d.selfSufficiency.toFixed(1)}%<br/>
+                        Dependency Rate: ${d.dependencyRate.toFixed(1)}%<br/>
+                        Import Volume: ${d.importVolume.toLocaleString()} GWh
+                    `);
+            })
+            .on("mouseout", function() {
+                d3.select(this)
+                    .style("fill-opacity", "0.6")
+                    .style("stroke-width", "1px")
+                    .style("cursor", "default");
+                
+                tooltip.style("opacity", "0");
+            });
+
+        // Add legend
+        const legendGroup = chartGroup.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${width - 120}, 20)`);
+
+        legendGroup.append("text")
+            .attr("x", 0)
+            .attr("y", -5)
+            .style("font-size", theme.fontSizes.label)
+            .text("Import Volume");
+
+        const legendData = [1000, 5000, 10000];
+        legendGroup.selectAll("circle")
+            .data(legendData)
+            .enter()
+            .append("circle")
+            .attr("cx", 30)
+            .attr("cy", (d, i) => i * 25 + 10)
+            .attr("r", d => rScale(d))
+            .style("fill", "none")
+            .style("stroke", theme.colors.hover);
+
+        legendGroup.selectAll("text.legend-label")
+            .data(legendData)
+            .enter()
+            .append("text")
+            .attr("class", "legend-label")
+            .attr("x", 60)
+            .attr("y", (d, i) => i * 25 + 15)
+            .style("font-size", "10px")
+            .text(d => `${d.toLocaleString()} GWh`);
+
+        // Add resize observer
+        let resizeTimeout;
+        const resizeObserver = new ResizeObserver(() => {
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const newBounds = container.node().getBoundingClientRect();
+                svg.attr("viewBox", `0 0 ${newBounds.width} ${newBounds.height}`);
+                rScale.range([5, Math.min(newBounds.width, newBounds.height) * 0.05]);
+            }, 250);
+        });
+        resizeObserver.observe(container.node());
+    });
+}
+
+window.createAndAddBubbleChart = createAndAddBubbleChart;
+
+// Finally, add the right_barchart.js implementation
+let consumptionData = [];
+
+const SECTOR_STRUCTURE = {
+    industry: {
+        name: "Industry",
+        subsectors: {
+            chemical: "Final consumption - industry sector - chemical and petrochemical - energy use",
+            iron: "Final consumption - industry sector - iron and steel - energy use",
+            nonferrous: "Final consumption - industry sector - non-ferrous metals - energy use",
+            nonmetallic: "Final consumption - industry sector - non-metallic minerals - energy use",
+            transport: "Final consumption - industry sector - transport equipment - energy use",
+            machinery: "Final consumption - industry sector - machinery - energy use",
+            mining: "Final consumption - industry sector - mining and quarrying - energy use",
+            food: "Final consumption - industry sector - food, beverages and tobacco - energy use",
+            paper: "Final consumption - industry sector - paper, pulp and printing - energy use",
+            wood: "Final consumption - industry sector - wood and wood products - energy use",
+            textile: "Final consumption - industry sector - textile and leather - energy use",
+            construction: "Final consumption - industry sector - construction - energy use"
+        }
+    },
+    transport: {
+        name: "Transport",
+        subsectors: {
+            rail: "Final consumption - transport sector - rail - energy use",
+            road: "Final consumption - transport sector - road - energy use",
+            pipeline: "Final consumption - transport sector - pipeline transport - energy use"
+        }
+    },
+    other: {
+        name: "Other",
+        subsectors: {
+            households: "Final consumption - other sectors - households - energy use",
+            agriculture: "Final consumption - other sectors - agriculture and forestry - energy use",
+            services: "Final consumption - other sectors - commercial and public services - energy use",
+            fishing: "Final consumption - other sectors - fishing - energy use"
+        }
+    }
+};
+
+const COLOR_SCHEMES = {
+    industry: ["#08519c", "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#4292c6", "#2171b5", "#084594", "#082c7c", "#08306b", "#2166ac", "#4393c3"],
+    transport: ["#d94801", "#fd8d3c", "#fdae6b", "#fdd0a2", "#f16913", "#d94801", "#a63603", "#7f2704"],
+    other: ["#31a354", "#74c476", "#a1d99b", "#c7e9c0", "#238b45", "#006d2c", "#00441b", "#41ab5d"]
+};
+
+async function loadConsumptionData(csvPath) {
+    if (consumptionData.length === 0) {
+        const response = await fetch(csvPath);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        consumptionData = d3.csvParse(await response.text());
+    }
+    return consumptionData;
+}
+
+function processEUTotalData(data, year) {
+    const yearData = data.filter(row => row.TIME_PERIOD === year);
+    const sectorData = {};
+
+    Object.entries(SECTOR_STRUCTURE).forEach(([sectorKey, sectorInfo]) => {
+        sectorData[sectorKey] = {
+            name: sectorInfo.name,
+            total: 0,
+            subsectors: []
+        };
+
+        Object.entries(sectorInfo.subsectors).forEach(([subKey, balanceKey]) => {
+            const subSectorData = yearData.filter(row => row.nrg_bal === balanceKey)
+                .reduce((sum, row) => sum + (parseFloat(row.OBS_VALUE) || 0), 0);
+
+            if (subSectorData > 0) {
+                sectorData[sectorKey].subsectors.push({
+                    name: subKey,
+                    value: subSectorData,
+                    fullName: balanceKey
+                });
+                sectorData[sectorKey].total += subSectorData;
+            }
+        });
+
+        sectorData[sectorKey].subsectors.sort((a, b) => a.value - b.value);
+    });
+
+    return sectorData;
+}
+
+function createBarChart(container, data, width, height, margin, year) {
+    container.selectAll("*").remove();
+
+    const svg = container.append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("class", "euec-chart-svg")
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const sectors = Object.keys(data).sort((a, b) => data[b].total - data[a].total);
+
+    const x = d3.scaleBand()
+        .domain(sectors)
+        .range([0, width])
+        .padding(0.3);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(Object.values(data), d => d.total)])
+        .range([height, 0]);
+
+    const colorScales = {};
+    Object.keys(COLOR_SCHEMES).forEach(sector => {
+        colorScales[sector] = d3.scaleOrdinal()
+            .domain(data[sector].subsectors.map(d => d.name))
+            .range(COLOR_SCHEMES[sector]);
+    });
+
+    if (!d3.select("body").select(".euec-tooltip").empty()) {
+        d3.select("body").select(".euec-tooltip").remove();
+    }
+    
+    const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "euec-tooltip")
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("background-color", "white")
+        .style("border", "1px solid #ddd")
+        .style("border-radius", "8px")
+        .style("padding", "12px")
+        .style("font-size", "12px")
+        .style("box-shadow", "0 2px 8px rgba(0,0,0,0.15)")
+        .style("pointer-events", "none")
+        .style("display", "none")
+        .style("z-index", "1000");
+
+    svg.append("text")
+        .attr("class", "euec-chart-title")
+        .attr("x", width / 2)
+        .attr("y", -margin.top / 2)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
+        .text(`EU Electricity Consumption by Sectors (${year})`);
+
+    svg.append("g")
+        .attr("class", "euec-axis-x")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).tickFormat(d => data[d].name));
+
+    svg.append("g")
+        .attr("class", "euec-axis-y")
+        .call(d3.axisLeft(y).tickFormat(d => `${d3.format(".2s")(d)} GWh`));
+
+    sectors.forEach(sector => {
+        let cumulative = height;
+        const sectorGroup = svg.append("g")
+            .attr("class", `euec-sector-${sector}`)
+            .attr("id", `euec-sector-group-${sector}`);
+
+        const reversedSubsectors = [...data[sector].subsectors].reverse();
+
+        sectorGroup.selectAll(".euec-bar")
+            .data(reversedSubsectors)
+            .enter()
+            .append("rect")
+            .attr("class", "euec-bar")
+            .attr("id", d => `euec-bar-${sector}-${d.name}`)
+            .attr("x", x(sector))
+            .attr("y", d => {
+                const barHeight = height - y(d.value);
+                cumulative -= barHeight;
+                return cumulative;
+            })
+            .attr("height", d => height - y(d.value))
+            .attr("width", x.bandwidth())
+            .attr("fill", d => colorScales[sector](d.name))
+            .style("cursor", "pointer")
+            .on("mouseover", function(event, d) {
+                const bar = d3.select(this);
+                bar.style("opacity", 0.8)
+                   .style("stroke", "#000")
+                   .style("stroke-width", 2);
+
+                d3.select(`#euec-legend-item-${sector}-${d.name}`)
+                    .select("text")
+                    .style("font-weight", "bold");
+                d3.select(`#euec-legend-item-${sector}-${d.name}`)
+                    .select("rect")
+                    .style("opacity", 0.8);
+
+                const sectorTotal = data[sector].total;
+                const percentage = (d.value / sectorTotal * 100).toFixed(1);
+
+                tooltip
+                    .style("display", "block")
+                    .style("opacity", 1)
+                    .style("left", `${event.pageX + 15}px`)
+                    .style("top", `${event.pageY - 15}px`)
+                    .html(`
+                        <div style="margin-bottom: 8px; font-weight: bold; color: ${colorScales[sector](d.name)}; border-bottom: 1px solid #eee; padding-bottom: 4px">
+                            ${data[sector].name} - ${d.name}
+                        </div>
+                        <div style="margin-bottom: 4px">
+                            <span style="color: #666">Consumption: </span>
+                            <span style="font-weight: bold">${d3.format(",.0f")(d.value)} GWh</span>
+                        </div>
+                        <div>
+                            <span style="color: #666">Share of Sector: </span>
+                            <span style="font-weight: bold">${percentage}%</span>
+                        </div>
+                    `);
+            })
+            .on("mouseout", function(event, d) {
+                d3.select(this)
+                    .style("opacity", 1)
+                    .style("stroke", "none");
+
+                d3.select(`#euec-legend-item-${sector}-${d.name}`)
+                    .select("text")
+                    .style("font-weight", "normal");
+                d3.select(`#euec-legend-item-${sector}-${d.name}`)
+                    .select("rect")
+                    .style("opacity", 1);
+
+                tooltip
+                    .style("opacity", 0)
+                    .style("display", "none");
+            });
+    });
+
+    const legendSpacing = 17;
+    let currentY = 0;
+    
+    sectors.forEach((sector) => {
+        const legend = svg.append("g")
+            .attr("class", "euec-legend")
+            .attr("transform", `translate(${width + 16}, 0)`);
+    
+        legend.append("text")
+            .attr("class", "euec-legend-title")
+            .attr("transform", `translate(5, ${currentY})`)
+            .style("font-weight", "bold")
+            .style("font-size", "15px")
+            .text(`${data[sector].name} (${d3.format(",.0f")(data[sector].total)} GWh)`);
+        
+        currentY += legendSpacing;
+    
+        const sortedSubsectors = [...data[sector].subsectors].reverse();
+        sortedSubsectors.forEach((subsector) => {
+            const legendItem = legend.append("g")
+                .attr("class", "euec-legend-item")
+                .attr("id", `euec-legend-item-${sector}-${subsector.name}`)
+                .attr("transform", `translate(5, ${currentY})`)
+                .style("cursor", "pointer");
+    
+            legendItem.append("rect")
+                .attr("width", 12)
+                .attr("height", 12)
+                .attr("y", -9)
+                .attr("fill", colorScales[sector](subsector.name));
+    
+            legendItem.append("text")
+                .attr("x", 20)
+                .attr("y", 2)
+                .style("font-size", "12px")
+                .text(`${subsector.name} (${d3.format(",.0f")(subsector.value)} GWh)`);
+    
+            legendItem
+                .on("mouseover", function() {
+                    d3.select(this).select("text")
+                        .style("font-weight", "bold");
+                    d3.select(this).select("rect")
+                        .style("opacity", 0.8);
+    
+                    const bar = svg.select(`#euec-bar-${sector}-${subsector.name}`);
+                    bar.style("opacity", 0.8)
+                       .style("stroke", "#000")
+                       .style("stroke-width", 1);
+                    
+                    const barNode = bar.node();
+                    const barRect = barNode.getBoundingClientRect();
+                    const percentage = (subsector.value / data[sector].total * 100).toFixed(1);
+    
+                    tooltip
+                        .style("display", "block")
+                        .style("opacity", 1)
+                        .style("left", `${barRect.left + barRect.width / 2}px`)
+                        .style("top", `${barRect.top - 15}px`)
+                        .html(`
+                            <div style="margin-bottom: 8px; font-weight: bold; color: ${colorScales[sector](subsector.name)}; border-bottom: 1px solid #eee; padding-bottom: 4px">
+                                ${data[sector].name} - ${subsector.name}
+                            </div>
+                            <div style="margin-bottom: 4px">
+                                <span style="color: #666">Consumption: </span>
+                                <span style="font-weight: bold">${d3.format(",.0f")(subsector.value)} GWh</span>
+                            </div>
+                            <div>
+                                <span style="color: #666">Share of Sector: </span>
+                                <span style="font-weight: bold">${percentage}%</span>
+                            </div>
+                        `);
+                })
+                .on("mouseout", function() {
+                    d3.select(this).select("text")
+                        .style("font-weight", "normal");
+                    d3.select(this).select("rect")
+                        .style("opacity", 1);
+    
+                    svg.select(`#euec-bar-${sector}-${subsector.name}`)
+                        .style("opacity", 1)
+                        .style("stroke", "none");
+    
+                    tooltip
+                        .style("opacity", 0)
+                        .style("display", "none");
+                });
+    
+            currentY += legendSpacing;
+        });
+    });
+}
+
+async function createAndAddBarChart(containerSelector, csvPath, selectedYear) {
+    const container = d3.select(containerSelector);
+    const margin = { top: 40, right: 200, bottom: 40, left: 60 };
+    const width = parseInt(container.style("width")) - margin.left - margin.right;
+    const height = Math.min(400, parseInt(container.style("height")) - margin.top - margin.bottom);
+
+    try {
+        const data = await loadConsumptionData(csvPath);
+        const processedData = processEUTotalData(data, selectedYear);
+        createBarChart(container, processedData, width, height, margin, selectedYear);
+    } catch (error) {
+        console.error("Error creating bar chart:", error);
+        container.html(`<div class="error">Error loading visualization: ${error.message}</div>`);
+    }
+}
+
+window.createAndAddBarChart = createAndAddBarChart;
+
+
+        // Zoom restriction script
+        (function () {
+            function restrictZoom() {
+                const maxScale = 1.75;
+                const viewportMeta = document.querySelector("meta[name='viewport']");
+                if (viewportMeta) {
+                    const scale = window.outerWidth / window.innerWidth;
+                    if (scale > maxScale) {
+                        viewportMeta.setAttribute(
+                            "content",
+                            `width=device-width, initial-scale=1, maximum-scale=${maxScale}`
+                        );
+                    }
+                }
+            }
+            window.addEventListener("resize", restrictZoom);
+            window.addEventListener("wheel", restrictZoom);
+        })();
+
+        // Initialize dynamic text when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            await updateDynamicText();
+            setupDynamicTextListeners();
+        });
+    </script>
+</body>
+</html>
