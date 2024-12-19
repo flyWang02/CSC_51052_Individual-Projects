@@ -12,22 +12,21 @@ const Navbar = () => {
           EU Energy Data
         </div>
         <div className="navbar-links">
-          <Link 
+          {/* <Link 
             to="/" 
             className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
           >
             Directory
-          </Link>
-          <Link 
+          </Link> */}
+          {/* <Link 
             to="/country" 
             className={`nav-link ${location.pathname.includes('/country') ? 'active' : ''}`}
           >
             Dashboard
-          </Link>
+          </Link> */}
           <a 
             href="../html/Year.html" 
             className="nav-link"
-            target="_blank"
             rel="noopener noreferrer"
           >
             EU Electricity

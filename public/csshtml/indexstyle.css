@@ -1,3 +1,8 @@
+html, body {
+  overflow: hidden; /* 禁止滚动 */
+  margin: 0; /* 去掉默认外边距 */
+  padding: 0; /* 去掉默认内边距 */
+}
 body {
   font-family: Arial, sans-serif;
   background-color: #e6ebf2;
@@ -117,17 +122,15 @@ main {
 }
 
 #right-panel {
-  height: 91vh;
   position: absolute;
   right: 17vh;
-  top: 25px;
+  top: 20px;
   width: 22%;
   background-color: #fff;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 8px 8px rgba(0, 0, 0, 0.2);
   z-index: 4;
-  overflow-y: auto;
   min-width: 250px;
   max-width: 30%;
   display: flex;
@@ -146,15 +149,20 @@ main {
 
 #bubble-chart-container {
   flex: 1;
-  min-height: 500px;
+  min-height: 450px;
+  margin-bottom: 0;
+  border: none;
 }
 
 #bar-chart-container {
   flex: 1;
-  min-height: 400px;
+  min-height: 420px;
+  margin-top: 0;
+  transform: translateY(-30px);
+  border: none;
 }
 
-#new-chart-container {
+/* #new-chart-container {
   flex: 1;
   min-height: 200px;
 }
@@ -167,7 +175,7 @@ main {
   background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(3, 1, 1, 0.2);
   border-radius: 10px;
-}
+} */
 
 @media screen and (max-width: 1440px) {
   #right-panel {
@@ -204,7 +212,6 @@ main {
     right: auto;
     top: auto;
     max-width: none;
-    height: auto;
     min-height: 300px;
   }
 

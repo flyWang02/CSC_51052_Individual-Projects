@@ -37,7 +37,8 @@ const CountryDirectory = () => {
   };
 
   const handleCountrySelect = (country) => {
-    navigate(`/country/${country.toLowerCase()}`);
+    // navigate(`/country/${country.toLowerCase()}`);
+    navigate(`/country`, { state: { selectedCountry: country } });
   };
 
   const filteredCountries = Object.entries(countries).filter(([country]) =>
@@ -53,7 +54,7 @@ const CountryDirectory = () => {
         <div className="search-container">
           <input
             type="text"
-            placeholder="搜索国家..."
+            placeholder="Search countries..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
